@@ -41,7 +41,7 @@ import {
   CheckboxElementType,
   DateTimePickerElementType,
   IFrameElementType,
-  RepeatElementType,
+  IterateElementType,
   RecordSelectorElementType,
   HeaderElementType,
   FooterElementType,
@@ -249,7 +249,7 @@ export default (context) => {
   app.$registry.register('element', new CheckboxElementType(context))
   app.$registry.register('element', new DateTimePickerElementType(context))
   app.$registry.register('element', new RecordSelectorElementType(context))
-  app.$registry.register('element', new RepeatElementType(context))
+  app.$registry.register('element', new IterateElementType(context))
   app.$registry.register('element', new RatingInputElementType(context))
   app.$registry.register('element', new MenuElementType(context))
 
