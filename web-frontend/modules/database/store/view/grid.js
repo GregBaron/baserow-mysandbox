@@ -533,24 +533,30 @@ export const mutations = {
       const existingRowState = state.rows[index]
       Object.assign(existingRowState, values)
       if (metadata) {
+        // Use single Vue.set to ensure reactivity
         if (!existingRowState._) {
-          Vue.set(existingRowState, '_', {})
+          Vue.set(existingRowState, '_', { metadata })
+        } else {
+          Vue.set(existingRowState._, 'metadata', metadata)
         }
-        Vue.set(existingRowState._, 'metadata', metadata)
       }
     }
   },
+  /**
+   * Updates row metadata in the grid buffer.
+   *
+   * Note: Metadata is stored on row._.metadata and exists only while rows are
+   * in the buffer. When rows leave and re-enter the buffer, fresh metadata is
+   * fetched from the API along with the row data.
+   */
   UPDATE_ROW_METADATA(state, { row, metadata }) {
     const index = state.rows.findIndex((item) => item.id === row.id)
     if (index !== -1) {
       const existingRowState = state.rows[index]
 
-      if (!existingRowState._) {
-        Vue.set(existingRowState, '_', {})
-      }
-
       // Deep merge new metadata with existing metadata
-      const mergedMetadata = { ...(existingRowState._.metadata || {}) }
+      const existingMetadata = existingRowState._?.metadata || {}
+      const mergedMetadata = { ...existingMetadata }
 
       // Deep merge each metadata type (e.g., ai_field)
       Object.keys(metadata).forEach((metadataType) => {
@@ -569,8 +575,12 @@ export const mutations = {
         mergedMetadata[metadataType] = newTypeMetadata
       })
 
-      // Use Vue.set to ensure reactivity
-      Vue.set(existingRowState._, 'metadata', mergedMetadata)
+      // Use single Vue.set to ensure reactivity - create _ object with metadata if needed
+      if (!existingRowState._) {
+        Vue.set(existingRowState, '_', { metadata: mergedMetadata })
+      } else {
+        Vue.set(existingRowState._, 'metadata', mergedMetadata)
+      }
     }
   },
   UPDATE_ROW_VALUES(state, { row, values }) {
@@ -975,21 +985,6 @@ export const actions = {
             populateRow(row, metadata, false)
           })
 
-          // Store metadata in the rowMetadata store for persistence across refreshes
-          if (data.row_metadata && Object.keys(data.row_metadata).length > 0) {
-            const table = rootGetters['table/getSelected']
-            if (table) {
-              dispatch(
-                'rowMetadata/handleRowsUpdate',
-                {
-                  tableId: table.id,
-                  metadata: data.row_metadata,
-                },
-                { root: true }
-              )
-            }
-          }
-
           commit('ADD_ROWS', {
             rows: data.results,
             prependToRows: prependToBuffer,
@@ -1164,21 +1159,6 @@ export const actions = {
       populateRow(row, metadata, false)
     })
 
-    // Store metadata in the rowMetadata store for persistence across refreshes
-    if (data.row_metadata && Object.keys(data.row_metadata).length > 0) {
-      const table = rootGetters['table/getSelected']
-      if (table) {
-        dispatch(
-          'rowMetadata/handleRowsUpdate',
-          {
-            tableId: table.id,
-            metadata: data.row_metadata,
-          },
-          { root: true }
-        )
-      }
-    }
-
     commit('CLEAR_ROWS')
     commit('ADD_ROWS', {
       rows: data.results,
@@ -1273,21 +1253,6 @@ export const actions = {
           const metadata = extractRowMetadata(data, row.id)
           populateRow(row, metadata, false)
         })
-
-        // Store metadata in the rowMetadata store for persistence across refreshes
-        if (data.row_metadata && Object.keys(data.row_metadata).length > 0) {
-          const table = rootGetters['table/getSelected']
-          if (table) {
-            dispatch(
-              'rowMetadata/handleRowsUpdate',
-              {
-                tableId: table.id,
-                metadata: data.row_metadata,
-              },
-              { root: true }
-            )
-          }
-        }
 
         commit('ADD_ROWS', {
           rows: data.results,
@@ -3028,6 +2993,8 @@ export const actions = {
 
     // Delegate to field types to handle their specific realtime update logic
     // This allows each field type to decide what to do when metadata changes
+    // Note: metadata is already the row-specific metadata (not keyed by row.id)
+    // as it's passed from viewTypes.rowUpdated which receives data.metadata[row.id]
     updatedFieldIds.forEach((fieldId) => {
       const field = rootGetters['field/get'](fieldId)
       if (field) {
@@ -3037,7 +3004,7 @@ export const actions = {
           field,
           oldRow,
           newRow,
-          metadata[row.id] || {}
+          metadata || {}
         )
       }
     })
@@ -3111,7 +3078,12 @@ export const actions = {
 
       if (oldRowInBuffer) {
         // If the old row is inside the buffer at a known position.
-        commit('UPDATE_ROW_IN_BUFFER', { row, values, metadata })
+        // Note: metadata is already the row-specific metadata (not keyed by row.id)
+        commit('UPDATE_ROW_IN_BUFFER', {
+          row,
+          values,
+          metadata,
+        })
         commit('SET_BUFFER_LIMIT', getters.getBufferLimit - 1)
       } else if (oldIsFirst) {
         // If the old row exists in the buffer, but is at the before position.
