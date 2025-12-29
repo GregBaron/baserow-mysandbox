@@ -210,10 +210,7 @@ def test_ai_field_metadata_handler_set_generating_bulk(premium_data_fixture):
     row2 = model.objects.create()
     row3 = model.objects.create()
 
-    result = AIFieldMetadataHandler.set_generating(
-        ai_field, [row1.id, row2.id, row3.id]
-    )
-    assert result is True
+    AIFieldMetadataHandler.set_generating(ai_field, [row1.id, row2.id, row3.id])
 
     row1.refresh_from_db()
     row2.refresh_from_db()

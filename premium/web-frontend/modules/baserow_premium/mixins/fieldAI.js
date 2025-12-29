@@ -14,7 +14,6 @@ export default {
       return this.$store.getters['workspace/get'](this.workspaceId)
     },
     generating() {
-      // Check row metadata for generating status from websocket updates
       const metadata = this.row?._.metadata
       if (metadata && metadata.ai_field) {
         const fieldMetadata = metadata.ai_field[this.field.id]
@@ -22,7 +21,6 @@ export default {
           return true
         }
       }
-      // Combine with local state for immediate feedback when user clicks generate
       return this.localGenerating
     },
     modelAvailable() {

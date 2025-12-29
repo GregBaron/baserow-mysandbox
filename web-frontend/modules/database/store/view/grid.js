@@ -2516,7 +2516,7 @@ export const actions = {
    * experience for the user.
    */
   async updateRowValue(
-    { commit, dispatch, getters },
+    { commit, dispatch, getters, rootGetters },
     {
       table,
       view,
@@ -2630,6 +2630,8 @@ export const actions = {
         const updatedFieldIds =
           batchResponse.data.metadata?.updated_field_ids || []
 
+        const rowsMetadata = batchResponse.data.metadata?.rows || {}
+
         const otherFieldsChangedInBackend = !_.isEqual(updatedFieldIds, [
           field.id,
         ])
@@ -2651,8 +2653,39 @@ export const actions = {
           if (existing === undefined) {
             continue
           }
+
+          const rowMetadata = rowsMetadata[updatedRowData.id] || {}
+
+          if (Object.keys(rowMetadata).length > 0) {
+            commit('REPLACE_ROW_METADATA', {
+              row: existing,
+              metadata: rowMetadata,
+            })
+          }
+
+          updatedFieldIds.forEach((fieldId) => {
+            const updatedField = rootGetters['field/get'](fieldId)
+            if (updatedField) {
+              const fieldType = this.$registry.get('field', updatedField.type)
+              fieldType.onRowRealtimeUpdate(
+                { store: this, commit, getters, dispatch },
+                updatedField,
+                existing,
+                { ...existing, ...rowData },
+                rowMetadata
+              )
+            }
+          })
+
           // Update the remaining values like formula, which depend on the backend.
           await updateValues(existing, rowData, true)
+
+          // Update row modal metadata
+          dispatch(
+            'rowModal/replaceRowMetadata',
+            { rowId: updatedRowData.id, metadata: rowMetadata },
+            { root: true }
+          )
 
           // If we can't optimistically update the row, refresh it to stop the loading
           // state, show proper messages, and update its position and state. Also, if the

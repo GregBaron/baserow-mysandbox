@@ -22,7 +22,9 @@ export default {
 
       if (metadata && metadata.ai_field) {
         const fieldMetadata = metadata.ai_field[this.field.id]
-        return fieldMetadata?.status === AI_FIELD_STATUS.GENERATING
+        if (fieldMetadata?.status === AI_FIELD_STATUS.GENERATING) {
+          return true
+        }
       }
 
       return false
@@ -98,7 +100,9 @@ export default {
 
       if (metadata && metadata.ai_field) {
         const fieldMetadata = metadata.ai_field[props.field.id]
-        return fieldMetadata?.status === AI_FIELD_STATUS.GENERATING
+        if (fieldMetadata?.status === AI_FIELD_STATUS.GENERATING) {
+          return true
+        }
       }
 
       return false
