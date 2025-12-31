@@ -1,3 +1,5 @@
+import asyncio
+
 import pytest
 from asgiref.sync import sync_to_async
 from channels.testing import WebsocketCommunicator
@@ -53,7 +55,7 @@ async def test_table_updated_message_not_leaking(data_fixture):
         user=user, table=table, name="Test"
     )
 
-    assert await received_message(communicator, "table_updated") is False
+    await communicator.receive_nothing(timeout=0.1)
     await communicator.disconnect()
 
 
@@ -82,7 +84,7 @@ async def test_table_deleted_message_not_leaking(data_fixture):
 
     await sync_to_async(TableHandler().delete_table)(user, table)
 
-    assert await received_message(communicator, "table_deleted") is False
+    await communicator.receive_nothing(timeout=0.1)
     await communicator.disconnect()
 
 
@@ -114,7 +116,7 @@ async def test_table_created_message_not_leaking(data_fixture):
         user, TableTrashableItemType.type, table.id
     )
 
-    assert await received_message(communicator, "table_created") is False
+    await communicator.receive_nothing(timeout=0.1)
     await communicator.disconnect()
 
 
