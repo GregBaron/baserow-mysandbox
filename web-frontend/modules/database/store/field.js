@@ -22,6 +22,14 @@ export const mutations = {
   SET_ITEMS(state, fields) {
     state.items = fields
   },
+  ORDER_ITEMS(state) {
+    state.items = [...state.items].sort((a, b) => {
+      const aPrimary = !!a.primary
+      const bPrimary = !!b.primary
+      if (aPrimary !== bPrimary) return aPrimary ? -1 : 1
+      return (a.order ?? 0) - (b.order ?? 0)
+    })
+  },
   SET_LOADING(state, value) {
     state.loading = value
   },
@@ -258,6 +266,9 @@ export const actions = {
 
     commit('UPDATE_ITEM', { id: field.id, values: data })
     commit('UPDATE_ITEM', { id: field.id, values: data })
+
+    // reorder items to put primary first
+    commit('ORDER_ITEMS')
 
     // The view might need to do some cleanup regarding the filters and sortings if the
     // type has changed.

@@ -128,7 +128,7 @@ export default {
     const tableId = parseInt(params.tableId)
     const viewId = params.viewId ? parseInt(params.viewId) : null
     // let's use undefined for view, as it's explicitly checked in components
-    const data = { error: null, view: undefined, fields: null }
+    const data = { error: null, view: undefined }
     // Try to find the table in the already fetched applications by the
     // workspacesAndApplications middleware and select that one. By selecting the table, the
     // fields and views are also going to be fetched.
@@ -158,10 +158,6 @@ export default {
       data.error = normalizeError(e)
       return data
     }
-
-    // After selecting the table the fields become available which need to be added to
-    // the data.
-    data.fields = store.getters['field/getAll']
 
     // Without a viewId, redirect the user to the default or the first available view.
     if (viewId === null) {
@@ -242,6 +238,9 @@ export default {
       tableLoading: (state) => state.table.loading,
       views: (state) => state.view.items,
     }),
+    fields() {
+      return this.$store.getters['field/getAll']
+    },
   },
   /**
    * The beforeCreate hook is called right after the asyncData finishes and when the
