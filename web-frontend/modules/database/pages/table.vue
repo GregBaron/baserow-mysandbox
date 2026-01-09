@@ -276,7 +276,7 @@ export default {
     }
   },
   beforeDestroy() {
-    if (this.table) {
+    if (this.table && this.realtimePage) {
       this.$realtime.unsubscribe(
         this.realtimePage.page,
         this.realtimePage.params
