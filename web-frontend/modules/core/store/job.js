@@ -14,8 +14,12 @@ const MAX_POLLING_ATTEMPTS = 100
  * @returns {*|null}
  */
 export function populateJob(job, registry) {
-  const type = registry.get('job', job.type)
-  return type.populate(job)
+  try {
+    const type = registry.get('job', job.type)
+    return type.populate(job)
+  } catch {
+    return null
+  }
 }
 
 export const state = () => ({
@@ -219,8 +223,10 @@ export const actions = {
    * Forcefully create an item in the store without making a call to the server.
    */
   forceCreate({ commit }, job) {
-    populateJob(job, this.$registry)
-    commit('ADD_ITEM', job)
+    const populatedJob = populateJob(job, this.$registry)
+    if (populatedJob) {
+      commit('ADD_ITEM', job)
+    }
   },
   /**
    * Forcefully update an item in the store without making a call to the server.

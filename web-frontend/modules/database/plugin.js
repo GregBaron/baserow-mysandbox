@@ -3,6 +3,8 @@ import {
   DuplicateTableJobType,
   SyncDataSyncTableJobType,
   FileImportJobType,
+  DuplicateFieldJobType,
+  AirtableJobType,
 } from '@baserow/modules/database/jobTypes'
 import {
   GridViewType,
@@ -413,6 +415,8 @@ export default (context) => {
   app.$registry.register('job', new DuplicateTableJobType(context))
   app.$registry.register('job', new SyncDataSyncTableJobType(context))
   app.$registry.register('job', new FileImportJobType(context))
+  app.$registry.register('job', new DuplicateFieldJobType(context))
+  app.$registry.register('job', new AirtableJobType(context))
 
   app.$registry.register('view', new GridViewType(context))
   app.$registry.register('view', new GalleryViewType(context))

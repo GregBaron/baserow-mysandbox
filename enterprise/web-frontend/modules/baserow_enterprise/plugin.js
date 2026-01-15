@@ -1,3 +1,4 @@
+import { AuditLogExportJobType } from '@baserow_enterprise/jobTypes'
 import { registerRealtimeEvents } from '@baserow_enterprise/realtime'
 import {
   RolePermissionManagerType,
@@ -149,6 +150,8 @@ export default (context) => {
     'workspaceSettingsPage',
     new TeamsWorkspaceSettingsPageType(context)
   )
+
+  app.$registry.register('job', new AuditLogExportJobType(context))
 
   app.$registry.register('license', new AdvancedLicenseType(context))
   app.$registry.register(
