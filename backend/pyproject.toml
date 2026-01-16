@@ -129,7 +129,6 @@ dev = [
     "responses==0.25.8",
     "watchdog==6.0.0",
     "argh==0.31.3",
-    "black==23.3.0",
     "pyinstrument==5.1.2",
     "pyfakefs==6.0.0",
     "pytest-xdist==3.8.0",
