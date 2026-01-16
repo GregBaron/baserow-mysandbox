@@ -14,7 +14,7 @@ from baserow.core.trash.trash_types import (
 )
 from baserow_enterprise.role.handler import RoleAssignmentHandler
 from baserow_enterprise.role.models import Role
-from tests.baserow.contrib.database.utils import get_message, received_message
+from tests.baserow.contrib.database.utils import get_message
 
 
 @pytest.fixture(autouse=True)
