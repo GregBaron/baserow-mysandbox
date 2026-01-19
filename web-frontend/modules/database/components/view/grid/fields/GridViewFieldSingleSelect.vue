@@ -48,5 +48,13 @@ export default {
       editing: false,
     }
   },
+  watch: {
+    editing: {
+      handler(newValue) {
+        this.$emit('editing-changed', newValue)
+      },
+      immediate: true,
+    },
+  },
 }
 </script>

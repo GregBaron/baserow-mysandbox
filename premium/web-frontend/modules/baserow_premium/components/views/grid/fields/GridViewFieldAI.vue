@@ -98,7 +98,7 @@ export default {
   },
   methods: {
     select() {
-      this.$el.keydownEvent = (event) => {
+      const keydownEventListener = (event) => {
         if (event.key === 'Enter') {
           // When the field is selected but doesn't have any generated value yet,
           // we want to trigger AI generation
@@ -107,10 +107,22 @@ export default {
           }
         }
       }
-      document.body.addEventListener('keydown', this.$el.keydownEvent)
+      document.body.addEventListener('keydown', keydownEventListener)
       this.$once('unselected', () => {
-        document.body.removeEventListener('keydown', this.$el.keydownEvent)
+        document.body.removeEventListener('keydown', keydownEventListener)
       })
+    },
+    canKeyDown() {
+      if (this.editing) {
+        return false
+      }
+      if (
+        this.$refs.cell &&
+        typeof this.$refs.cell.canKeyDown === 'function'
+      ) {
+        return this.$refs.cell.canKeyDown()
+      }
+      return true
     },
     canKeyboardShortcut() {
       // Since this component is based on gridField mixin
