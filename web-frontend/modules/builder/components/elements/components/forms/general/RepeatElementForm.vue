@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent @keydown.enter.prevent>
+  <form v-if="elementPage && sharedPage" @submit.prevent @keydown.enter.prevent>
     <FormGroup
       v-show="dataSourceDropdownAvailable"
       :label="$t('dataSourceDropdown.label')"

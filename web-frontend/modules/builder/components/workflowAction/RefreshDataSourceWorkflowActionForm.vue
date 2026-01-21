@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent>
+  <form v-if="elementPage && sharedPage" @submit.prevent>
     <FormGroup
       :label="$t('tableElementForm.dataSource')"
       small-label

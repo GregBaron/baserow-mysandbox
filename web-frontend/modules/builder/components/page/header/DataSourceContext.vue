@@ -112,7 +112,7 @@
       </div>
     </template>
     <DataSourceCreateEditModal
-      v-if="editModalVisible"
+      v-if="editModalVisible && sharedPage"
       :key="currentDataSourceId"
       ref="dataSourceCreateEditModal"
       :data-source-id="currentDataSourceId"

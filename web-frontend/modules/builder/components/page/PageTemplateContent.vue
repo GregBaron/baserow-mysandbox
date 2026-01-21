@@ -1,5 +1,5 @@
 <template>
-  <div v-if="currentPage" :key="currentPage.id" class="page-template">
+  <div v-if="currentPage && sharedPage" :key="currentPage.id" class="page-template">
     <PageHeader />
     <div class="layout__col-2-2 page-editor__content">
       <div :style="{ width: `calc(100% - ${panelWidth}px)` }">

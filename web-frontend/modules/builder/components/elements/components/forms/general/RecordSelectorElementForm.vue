@@ -1,5 +1,5 @@
 <template>
-  <form @submit.prevent @keydown.enter.prevent>
+  <form v-if="elementPage && sharedPage" @submit.prevent @keydown.enter.prevent>
     <CustomStyleButton
       v-model="values.styles"
       style-key="input"

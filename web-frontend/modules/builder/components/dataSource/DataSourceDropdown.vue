@@ -46,6 +46,7 @@
       </template>
     </Dropdown>
     <DataSourceCreateEditModal
+      v-if="sharedPage"
       :key="modalKey"
       ref="dataSourceCreateEditModal"
       @updated="onDataSourceUpdated"
@@ -59,6 +60,7 @@ import DataSourceCreateEditModal from '@baserow/modules/builder/components/dataS
 export default {
   name: 'DataSourceDropdown',
   components: { DataSourceCreateEditModal },
+  inject: ['builder'],
   props: {
     modelValue: {
       type: Number,
@@ -89,6 +91,9 @@ export default {
   computed: {
     isOnSharedPage() {
       return this.localDataSources === null
+    },
+    sharedPage() {
+      return this.$store.getters['page/getSharedPage'](this.builder)
     },
   },
   methods: {

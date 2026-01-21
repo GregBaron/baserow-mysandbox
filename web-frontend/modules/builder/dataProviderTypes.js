@@ -55,6 +55,9 @@ export class DataSourceDataProviderType extends DataProviderType {
       applicationContext.builder
     )
 
+    // Guard needed here because this is called from inside useAsyncData.
+    if (!page) return
+
     const dataSources =
       this.app.$store.getters['dataSource/getPageDataSources'](page)
 
@@ -79,6 +82,9 @@ export class DataSourceDataProviderType extends DataProviderType {
    * @param {Object} applicationContext
    */
   async init(applicationContext) {
+    // Guard needed here because this is called from inside useAsyncData.
+    if (!applicationContext.page) return
+
     const dataSources = this.app.$store.getters[
       'dataSource/getPageDataSources'
     ](applicationContext.page)
