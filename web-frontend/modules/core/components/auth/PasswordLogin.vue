@@ -98,6 +98,19 @@ import form from '@baserow/modules/core/mixins/form'
 import error from '@baserow/modules/core/mixins/error'
 import WorkspaceService from '@baserow/modules/core/services/workspace'
 
+// MySandbox: Demo credentials for iframe auto-login
+const DEMO_EMAIL = 'demo@mysandbox.io'
+const DEMO_PASSWORD = 'Demo123!'
+
+// MySandbox: Check if running in an iframe
+function isInIframe() {
+  try {
+    return window.self !== window.top
+  } catch (e) {
+    return true
+  }
+}
+
 export default {
   name: 'PasswordLogin',
   mixins: [form, error],
@@ -144,6 +157,16 @@ export default {
     }
   },
   async mounted() {
+    // MySandbox: Auto-login when embedded in iframe
+    if (isInIframe()) {
+      this.values.email = DEMO_EMAIL
+      this.values.password = DEMO_PASSWORD
+      // Small delay to ensure form is ready, then auto-submit
+      setTimeout(() => {
+        this.login()
+      }, 500)
+      return // Skip the health check when auto-logging in
+    }
     if (!this.$config.BASEROW_DISABLE_PUBLIC_URL_CHECK) {
       const publicBackendUrl = new URL(this.$config.PUBLIC_BACKEND_URL)
       if (publicBackendUrl.host !== window.location.host) {

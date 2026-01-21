@@ -1,0 +1,73 @@
+name: "Build MySandbox Baserow Image"
+
+on:
+  push:
+    branches: [main, develop]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: gregbaron/baserow-mysandbox
+
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # Build web-frontend image with our iframe auto-login modifications
+      - name: Build web-frontend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./web-frontend/Dockerfile
+          push: false
+          load: true
+          tags: baserow-web-frontend:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build backend image (no modifications needed)
+      - name: Build backend image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./backend/Dockerfile
+          push: false
+          load: true
+          tags: baserow-backend:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      # Build all-in-one image using our custom frontend
+      - name: Build and push all-in-one image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./deploy/all-in-one
+          file: ./deploy/all-in-one/Dockerfile
+          push: true
+          tags: |
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest
+            ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+          build-args: |
+            BACKEND_IMAGE=baserow-backend:local
+            WEBFRONTEND_IMAGE=baserow-web-frontend:local
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
